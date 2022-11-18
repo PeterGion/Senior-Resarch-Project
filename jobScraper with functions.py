@@ -1,19 +1,22 @@
 #cd C:\Users\Peter\"OneDrive - Eastern Connecticut State University"\"senior resarch"\Scraper
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
 from selenium.webdriver import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 import pandas as pd
 import matplotlib.pyplot as plot
-'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=d2a438c96f6e9c7e&from=gnav-util-jobsearch--indeedmobile'
-intialLink = "https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=d2a438c96f6e9c7e&from=gnav-util-jobsearch--indeedmobile"
 
-codingLanguages = []
-langaugeCount = []
-driver = None
+'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=d2a438c96f6e9c7e&from=gnav-util-jobsearch--indeedmobile'
+#last page url 'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&start=480&pp=gQLQAAABhIeCedIAAAAB7hgVOgC7AQQBJ2oGDgc-BgQGOajjWXbVPKtoxz6gCwrUiOulV1DE8uIWhUoN96a_OuBT8U_7MVbePCJ-LGFcdnO782Xn_FHn_kyCyXzXzUApJebFu3ZPLcBJ7fR3OAKkzXXF7yin61pkBkXh0NtyPYQkbIV6AQywYLj9_Svtj_2y5YhVU1Ak0d7D0YfDB32euOSKGPhbdg1WLeCKNO8mN10bZM35cPeLX_vBSufZLhQmk3ygIaMFnrjAdYemIt0iIAAA&vjk=58cab7537268f79a'
+intialLink = 'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=d2a438c96f6e9c7e&from=gnav-util-jobsearch--indeedmobile'
+
+codingLanguages = None
+langaugeCount = None
 
 def main():
-    globals()['driver'] = webdriver.Chrome(executable_path='C:\\Users\\Peter\\OneDrive - Eastern Connecticut State University\\senior resarch\\Scraper\\chromedriver.exe')
+    driver = webdriver.Chrome(executable_path='C:\\Users\\Peter\\OneDrive - Eastern Connecticut State University\\senior resarch\\Scraper\\chromedriver.exe')
     globals()['codingLanguages'] = [
         'Python',
         'Javascript',
@@ -28,29 +31,71 @@ def main():
         'Assembly',
     ]
     globals()['langaugeCount'] = [0,0,0,0,0,0,0,0,0,0,0]
-    globals()['driver'].get(intialLink)
+    driver.get(intialLink)
     
-    jobDescription = findJobDescription()
-    find_Languages(jobDescription)
-    create_plot()
     
+    lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
+    
+    while(len(lastPageElement) != 0):
+        time.sleep(3)
+        #all other logic will go here
+        #jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
+        
+        #this is not going to be here in the final version
+        ActionChains(driver).move_to_element(lastPageElement[0]).perform()
+        time.sleep(1)
+        lastPageElement[0].click()
+        lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
 
-def findJobDescription():
+    # print(len(driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")))
+    #onlyTwo(driver, jobAnchors)
+    #create_plot()
+
+
+def onlyTwo(driver,jobPannels):
+    for i in range(4):
+        time.sleep(5)
+        ActionChains(driver).move_to_element(jobPannels[i]).perform()
+        time.sleep(5)
+        jobPannels[i].click()
+        time.sleep(3)
+        jobDescription = findJobDescription(driver)
+        find_Languages(jobDescription)
+
+
+def allJobListings(driver, jobPannels):
+    for job in jobPannels:
+        if len(job.find_elements(By.ID,'mosaic-afterFifthJobResult')) == 0:
+            time.sleep(5)
+            ActionChains(driver).move_to_element(job).perform()
+            time.sleep(1)
+            job.click()
+            #job = wait.until(EC.invisibility_of_element_located(job))
+            #job = wait.until(EC.element_to_be_clickable(job))
+            #job.click()
+            #jobDescription = findJobDescription(driver)
+            #find_Languages(jobDescription)
+            #create_plot()
+            time.sleep(5)
+
+
+def findJobAnchors():
+    jobAnchors =  globals()['driver'].find_elements(By.CLASS_NAME,"jcs-JobTitle")
+    print(len(jobAnchors))
+    return jobAnchors
+
+
+def findJobDescription(driver):
     #class jcs-JobTitle
-    time.sleep(1)
     #jobDescription = seleniumDriver.find_element(By.CLASS_NAME,"jobsearch-jobDescriptionText")
-    jobDescription = globals()['driver'].find_element(By.CLASS_NAME,"jobsearch-jobDescriptionText")
+    jobDescription = driver.find_element(By.CLASS_NAME,"jobsearch-jobDescriptionText")
     time.sleep(1)
-    ActionChains(globals()['driver']).move_to_element(jobDescription).perform()
+    ActionChains(driver).move_to_element(jobDescription).perform()
     return jobDescription
 
 
 def find_Languages(element):
-    #print(element.text)
-    #time.sleep(1)
     elementText = element.text
-    #print('got this far')
-    #print(element.text)
     if(elementText.find('Python')!= -1 or elementText.find('python')!= -1) == True:
         globals()['langaugeCount'][0] += 1
     if(elementText.find('Javascript') != -1 or elementText.find('javascript') != -1 or elementText.find('JavaScript') != -1) == True:
@@ -80,7 +125,7 @@ def find_Languages(element):
         globals()['langaugeCount'][10] += 1
     print('this is in find_Languages ' + str(langaugeCount))
 
-
+    
 def find_LanguagesOG(element):
     print('gets to find_languages')
     #print(element.text)
