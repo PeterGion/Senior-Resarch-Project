@@ -39,7 +39,9 @@ def main():
     #checking if the last page element is there
     lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
     jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
-    startAtJobListing(driver,jobPannels, 10)
+
+    allJobListings(driver,jobPannels)
+    #startAtJobListing(driver,jobPannels, 8)
 
     #create_plot()
 
@@ -81,9 +83,9 @@ def startAtJobListing(driver, jobPannels, jobListingNumber):
     for i in range(jobListingNumber, len(jobPannels)):
         print(jobPannels[i].tag_name)
         ActionChains(driver).move_to_element(jobPannels[i]).perform()
-        wait = WebDriverWait(driver, 15)
-        wait.until(EC.element_to_be_clickable(jobPannels[i]))
-        #time.sleep(1)
+        # wait = WebDriverWait(driver, 15)
+        # wait.until(EC.element_to_be_clickable(jobPannels[i]))
+        time.sleep(1)
         jobPannels[i].click()
         #time.sleep(5)
         #jobDescription = findJobDescription(driver)
@@ -104,14 +106,15 @@ def jobListingsSetAmt(driver,jobPannels, amount):
 
 def allJobListings(driver,jobPannels):
     for job in jobPannels:
-        time.sleep(5)
-        ActionChains(driver).move_to_element(job).perform()
-        time.sleep(5)
-        print(job.text)
-        job.click()
-        time.sleep(3)
-        jobDescription = findJobDescription(driver)
-        find_Languages(jobDescription)
+        if(len(job.find_elements(By.CSS_SELECTOR,"#mosaic-afterTenthJobResult")) == 0):
+            time.sleep(5)
+            ActionChains(driver).move_to_element(job).perform()
+            time.sleep(5)
+            print(job.text)
+            job.click()
+            time.sleep(3)
+            jobDescription = findJobDescription(driver)
+            find_Languages(jobDescription)
 
 
 def findJobDescription(driver):
@@ -129,7 +132,6 @@ def find_Languages(element):
         globals()['langaugeCount'][0] += 1
     if(elementText.find('Javascript') != -1 or elementText.find('javascript') != -1 or elementText.find('JavaScript') != -1) == True:
         globals()['langaugeCount'][1] += 1
-        #print('this is going off')
     #looking for 'java' captialized or lowercased and return true if it doesn't return -1
     if((elementText.find('Java') != -1) or (elementText.find('java') != -1) == True and
     (elementText.find('Script',elementText.find('Java')) != -1) or (elementText.find('script',elementText.find('java')) != -1) == True):
@@ -165,4 +167,4 @@ def create_plot():
 
 
 if __name__ == '__main__':
-    main()
+   main()
