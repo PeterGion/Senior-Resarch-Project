@@ -9,6 +9,7 @@ from selenium.webdriver import ActionChains
 import time
 import pandas as pd
 import matplotlib.pyplot as plot
+import csv
 
 'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=d2a438c96f6e9c7e&from=gnav-util-jobsearch--indeedmobile'
 #last page url 'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&start=480&pp=gQLQAAABhIeCedIAAAAB7hgVOgC7AQQBJ2oGDgc-BgQGOajjWXbVPKtoxz6gCwrUiOulV1DE8uIWhUoN96a_OuBT8U_7MVbePCJ-LGFcdnO782Xn_FHn_kyCyXzXzUApJebFu3ZPLcBJ7fR3OAKkzXXF7yin61pkBkXh0NtyPYQkbIV6AQywYLj9_Svtj_2y5YhVU1Ak0d7D0YfDB32euOSKGPhbdg1WLeCKNO8mN10bZM35cPeLX_vBSufZLhQmk3ygIaMFnrjAdYemIt0iIAAA&vjk=58cab7537268f79a'
@@ -39,30 +40,34 @@ def main():
     #checking if the last page element is there
     lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
     jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
-
-    allJobListings(driver,jobPannels)
-    #startAtJobListing(driver,jobPannels, 8)
-
-    #create_plot()
+    goThoughSetPages(driver, jobPannels, lastPageElement, 1)
+    print(globals()['langaugeCount'])
+    create_plot()
 
 
-def goThoughSetPages(driver, element, amount):
+#updates the csv file with the most recent languageCount information
+def updateCsv():
+    with open('laguageCount.csv', 'w') as t:
+        writer = csv.writer(t)
+        writer.writerow(globals()['codingLanguages'])
+        writer.writerow(globals()['langaugeCount'])
+
+def goThoughSetPages(driver, jobPannels, lastPageElement, amount):
     iteration = 0
     #while there is a last page element and it is not higher than the iteration amount
-    while(len(element) != 0 and iteration < amount):
+    while(len(lastPageElement) != 0 and iteration < amount):
         time.sleep(3)
         #all other logic will go here
         #the way that indeed is set up is that they have all of the jobs in clickable divs
-        jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
+        #jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
         #going though all of the job listings on the page
         allJobListings(driver,jobPannels)
-        print('this is an iteration')
-        # ActionChains(driver).move_to_element(element[0]).perform()
+        ActionChains(driver).move_to_element(lastPageElement[0]).perform()
         time.sleep(1)
         #clicks on the next page element when the page is finished
-        element[0].click()
+        lastPageElement[0].click()
         #checks to see if  the next page eleement is there so when it goes to the loop condtional it can decided if it should continue
-        element = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
+        lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
         iteration += 1
 
 
@@ -90,19 +95,7 @@ def startAtJobListing(driver, jobPannels, jobListingNumber):
         #time.sleep(5)
         #jobDescription = findJobDescription(driver)
         #find_Languages(jobDescription)
-
         
-def jobListingsSetAmt(driver,jobPannels, amount):
-    for i in range(amount):
-        time.sleep(5)
-        # ActionChains(driver).move_to_element(jobPannels[i]).perform()
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located(jobPannels[i]))
-        jobPannels[i].click()
-        time.sleep(3)
-        jobDescription = findJobDescription(driver)
-        find_Languages(jobDescription)
-        
-
 
 def allJobListings(driver,jobPannels):
     for job in jobPannels:
@@ -115,8 +108,10 @@ def allJobListings(driver,jobPannels):
             #print(job.text)
             job.click()
             time.sleep(3)
-            #jobDescription = findJobDescription(driver)
-            #find_Languages(jobDescription)
+            jobDescription = findJobDescription(driver)
+            find_Languages(jobDescription)
+            updateCsv()
+
 
 
 def findJobDescription(driver):
