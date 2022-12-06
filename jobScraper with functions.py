@@ -106,15 +106,17 @@ def jobListingsSetAmt(driver,jobPannels, amount):
 
 def allJobListings(driver,jobPannels):
     for job in jobPannels:
-        if(len(job.find_elements(By.CSS_SELECTOR,"#mosaic-afterTenthJobResult")) == 0):
-            time.sleep(5)
+        if(len(job.find_elements(By.CSS_SELECTOR,"#mosaic-afterFifthJobResult")) == 0 and 
+        len(job.find_elements(By.CSS_SELECTOR,"#mosaic-afterTenthJobResult")) == 0 and
+        len(job.find_elements(By.CSS_SELECTOR,"#mosaic-afterFifteenthJobResult")) == 0):
+            time.sleep(1)
             ActionChains(driver).move_to_element(job).perform()
-            time.sleep(5)
-            print(job.text)
+            time.sleep(1)
+            #print(job.text)
             job.click()
             time.sleep(3)
-            jobDescription = findJobDescription(driver)
-            find_Languages(jobDescription)
+            #jobDescription = findJobDescription(driver)
+            #find_Languages(jobDescription)
 
 
 def findJobDescription(driver):
