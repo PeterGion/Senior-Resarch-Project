@@ -3,8 +3,6 @@
 #git commit -a -m ""
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
 import time
 import pandas as pd
@@ -45,8 +43,10 @@ def main():
     print(globals()['langaugeCount'])
     create_plot()
 
+
 def generateSeconds():
     return randint(30,360)
+
 
 #updates the csv file with the most recent languageCount information
 def updateCsv():
@@ -54,6 +54,7 @@ def updateCsv():
         writer = csv.writer(t)
         writer.writerow(globals()['codingLanguages'])
         writer.writerow(globals()['langaugeCount'])
+
 
 def goThoughSetPages(driver, jobPannels, lastPageElement, amount):
     iteration = 0
