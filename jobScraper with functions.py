@@ -16,6 +16,7 @@ intialLink = 'https://www.indeed.com/jobs?q=software+engineer&l=Connecticut&vjk=
 
 codingLanguages = None
 langaugeCount = None
+jobCount = 0
 
 def main():
     #path to my driver
@@ -40,6 +41,7 @@ def main():
     lastPageElement = driver.find_elements(By.CSS_SELECTOR,".css-jbuxu0 > div:last-child > a[aria-label=\"Next Page\"]")
     jobPannels = driver.find_elements(By.CLASS_NAME,"jobsearch-ResultsList > li")
     goThoughSetPages(driver, jobPannels, lastPageElement, 1)
+
     print(globals()['langaugeCount'])
     create_plot()
 
@@ -50,10 +52,11 @@ def generateSeconds():
 
 #updates the csv file with the most recent languageCount information
 def updateCsv():
-    with open('laguageCount.csv', 'w') as t:
-        writer = csv.writer(t)
+    with open('laguageCount.csv', 'w') as rowElement:
+        writer = csv.writer(rowElement)
         writer.writerow(globals()['codingLanguages'])
         writer.writerow(globals()['langaugeCount'])
+        writer.writerow(['number of job listings', globals()['jobCount']])
 
 
 def goThoughSetPages(driver, jobPannels, lastPageElement, amount):
@@ -114,6 +117,7 @@ def allJobListings(driver,jobPannels):
             time.sleep(3)
             jobDescription = findJobDescription(driver)
             find_Languages(jobDescription)
+            globals()['jobCount'] += 1
             updateCsv()
 
 
